@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מיפוי ודוח תלמיד</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: white;
+      padding: 20px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 {
+      font-size: 1.4em;
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9em;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: white;
+      color: #2563eb;
+    }
+
+    .btn-primary:hover { background: #e0e7ff; }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-danger:hover { background: #dc2626; }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-success:hover { background: #059669; }
+
+    .btn-outline {
+      background: transparent;
+      color: white;
+      border: 2px solid white;
+    }
+
+    .btn-outline:hover { background: rgba(255,255,255,0.15); }
+
+    /* Setup Screen */
+    .setup-screen {
+      max-width: 500px;
+      margin: 80px auto;
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+
+    .setup-screen h2 {
+      font-size: 1.6em;
+      margin-bottom: 30px;
+      color: #2563eb;
+    }
+
+    .setup-screen label {
+      display: block;
+      text-align: right;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .setup-screen input,
+    .setup-screen select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 1em;
+      margin-bottom: 20px;
+      transition: border-color 0.2s;
+      direction: rtl;
+    }
+
+    .setup-screen input:focus,
+    .setup-screen select:focus {
+      outline: none;
+      border-color: #2563eb;
+    }
+
+    .setup-screen .btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1em;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: white;
+      margin-top: 10px;
+    }
+
+    .setup-screen .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .gender-selector {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .gender-option {
+      flex: 1;
+      padding: 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 1.1em;
+    }
+
+    .gender-option:hover { border-color: #2563eb; }
+
+    .gender-option.selected {
+      border-color: #2563eb;
+      background: #eff6ff;
+      color: #2563eb;
+      font-weight: 600;
+    }
+
+    /* Main App Layout */
+    .app-container {
+      display: none;
+      height: calc(100vh - 64px);
+    }
+
+    .main-layout {
+      display: flex;
+      height: 100%;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: white;
+      border-left: 1px solid #e5e7eb;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .sidebar-section {
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .sidebar-category {
+      padding: 12px 16px;
+      font-weight: 600;
+      color: #374151;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.15s;
+    }
+
+    .sidebar-category:hover { background: #f9fafb; }
+
+    .sidebar-category.active {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+
+    .sidebar-category .badge {
+      background: #e5e7eb;
+      color: #6b7280;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.75em;
+      font-weight: 500;
+    }
+
+    .sidebar-category.has-selections .badge {
+      background: #2563eb;
+      color: white;
+    }
+
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      background: #f8fafc;
+    }
+
+    .category-title {
+      font-size: 1.4em;
+      color: #1e293b;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .subcategory {
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+
+    .subcategory-header {
+      padding: 14px 18px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e5e7eb;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .subcategory-header:hover { background: #f1f5f9; }
+
+    .subcategory-header .toggle-icon {
+      transition: transform 0.2s;
+      font-size: 0.8em;
+    }
+
+    .subcategory-header.collapsed .toggle-icon {
+      transform: rotate(90deg);
+    }
+
+    .subcategory-items {
+      padding: 0;
+    }
+
+    .subcategory-items.hidden { display: none; }
+
+    .item-row {
+      padding: 12px 18px;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.15s;
+    }
+
+    .item-row:last-child { border-bottom: none; }
+    .item-row:hover { background: #fafbfc; }
+
+    .item-row.selected {
+      background: #eff6ff;
+      border-right: 3px solid #2563eb;
+    }
+
+    .item-description {
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #1e293b;
+      font-size: 0.95em;
+    }
+
+    .item-notes {
+      font-size: 0.8em;
+      color: #9ca3af;
+      margin-bottom: 8px;
+      font-style: italic;
+    }
+
+    .level-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .level-btn {
+      padding: 6px 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-size: 0.82em;
+      transition: all 0.15s;
+      text-align: right;
+      max-width: 100%;
+      line-height: 1.4;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .level-btn:hover {
+      border-color: #93c5fd;
+      background: #f0f7ff;
+    }
+
+    .level-btn.level-1 { border-color: #fca5a5; }
+    .level-btn.level-1:hover { background: #fef2f2; border-color: #ef4444; }
+    .level-btn.level-1.selected { background: #fef2f2; border-color: #ef4444; color: #991b1b; font-weight: 600; }
+
+    .level-btn.level-2 { border-color: #fcd34d; }
+    .level-btn.level-2:hover { background: #fffbeb; border-color: #f59e0b; }
+    .level-btn.level-2.selected { background: #fffbeb; border-color: #f59e0b; color: #92400e; font-weight: 600; }
+
+    .level-btn.level-3 { border-color: #86efac; }
+    .level-btn.level-3:hover { background: #f0fdf4; border-color: #22c55e; }
+    .level-btn.level-3.selected { background: #f0fdf4; border-color: #22c55e; color: #166534; font-weight: 600; }
+
+    .level-btn.level-4 { border-color: #93c5fd; }
+    .level-btn.level-4:hover { background: #eff6ff; border-color: #3b82f6; }
+    .level-btn.level-4.selected { background: #eff6ff; border-color: #3b82f6; color: #1e40af; font-weight: 600; }
+
+    .level-label {
+      font-size: 0.7em;
+      color: #9ca3af;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    /* Report Panel */
+    .report-panel {
+      width: 380px;
+      background: white;
+      border-right: 1px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .report-panel.hidden { display: none; }
+
+    .report-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .report-header h3 {
+      color: #1e293b;
+      font-size: 1.1em;
+    }
+
+    .report-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    .report-category-section {
+      margin-bottom: 16px;
+    }
+
+    .report-category-title {
+      font-weight: 600;
+      color: #2563eb;
+      margin-bottom: 8px;
+      font-size: 1em;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .report-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 0.88em;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .report-item:last-child { border-bottom: none; }
+
+    .report-item .remove-btn {
+      background: none;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 1.1em;
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+
+    .report-item .remove-btn:hover { color: #dc2626; }
+
+    .report-item-text {
+      flex: 1;
+    }
+
+    .report-item-desc {
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .report-item-level {
+      color: #6b7280;
+      font-size: 0.9em;
+      margin-top: 2px;
+    }
+
+    .report-footer {
+      padding: 16px 20px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      gap: 8px;
+    }
+
+    .report-footer .btn { flex: 1; }
+
+    .report-count {
+      text-align: center;
+      padding: 8px;
+      background: #f0f7ff;
+      color: #2563eb;
+      font-weight: 500;
+      font-size: 0.9em;
+    }
+
+    /* Empty state */
+    .empty-report {
+      text-align: center;
+      color: #9ca3af;
+      padding: 40px 20px;
+    }
+
+    .empty-report svg {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    /* Print styles */
+    .print-overlay {
+      display: none;
+    }
+
+    /* Student info bar */
+    .student-info-bar {
+      padding: 10px 20px;
+      background: #eff6ff;
+      border-bottom: 1px solid #dbeafe;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 0.9em;
+    }
+
+    .student-info-bar strong { color: #2563eb; }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .sidebar { width: 220px; }
+      .report-panel { width: 320px; }
+    }
+
+    @media (max-width: 768px) {
+      .main-layout { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; max-height: 200px; }
+      .report-panel { width: 100%; height: 300px; }
+    }
+
+    /* Print modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 800px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .modal h2 {
+      color: #1e293b;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .printable-report {
+      font-size: 0.95em;
+      line-height: 1.6;
+    }
+
+    .printable-report h3 {
+      color: #2563eb;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 4px;
+    }
+
+    .printable-report .pr-item {
+      padding: 4px 0;
+      padding-right: 16px;
+    }
+
+    .printable-report .pr-desc {
+      font-weight: 500;
+    }
+
+    .printable-report .pr-level {
+      color: #6b7280;
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      .modal, .modal * { visibility: visible; }
+      .modal { position: absolute; top: 0; left: 0; right: 0; width: 100%; max-height: none; box-shadow: none; }
+      .modal-actions { display: none; }
+    }
+
+    /* Level legend */
+    .level-legend {
+      display: flex;
+      gap: 12px;
+      padding: 10px 20px;
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.8em;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    .legend-dot.l1 { background: #fca5a5; }
+    .legend-dot.l2 { background: #fcd34d; }
+    .legend-dot.l3 { background: #86efac; }
+    .legend-dot.l4 { background: #93c5fd; }
+
+    /* Password Screen */
+    .password-screen {
+      max-width: 400px;
+      margin: 120px auto;
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+
+    .password-screen .lock-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .password-screen .lock-icon svg {
+      width: 32px;
+      height: 32px;
+      color: white;
+      stroke: white;
+      fill: none;
+    }
+
+    .password-screen h2 {
+      font-size: 1.4em;
+      margin-bottom: 8px;
+      color: #1e293b;
+    }
+
+    .password-screen p {
+      color: #6b7280;
+      margin-bottom: 24px;
+      font-size: 0.95em;
+    }
+
+    .password-screen input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 1.1em;
+      text-align: center;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+      direction: ltr;
+    }
+
+    .password-screen input:focus {
+      outline: none;
+      border-color: #2563eb;
+    }
+
+    .password-screen input.error {
+      border-color: #ef4444;
+      animation: shake 0.4s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      50% { transform: translateX(8px); }
+      75% { transform: translateX(-4px); }
+    }
+
+    .password-screen .error-msg {
+      color: #ef4444;
+      font-size: 0.9em;
+      margin-bottom: 12px;
+      min-height: 1.2em;
+    }
+
+    .password-screen .btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1em;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: white;
+    }
+
+    .password-screen .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Password Screen -->
+<div id="passwordScreen" class="password-screen">
+  <div class="lock-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+    </svg>
+  </div>
+  <h2>מיפוי ודוח תלמיד/ה</h2>
+  <p>הזינו סיסמה כדי להיכנס למערכת</p>
+  <input type="password" id="passwordInput" placeholder="סיסמה" autofocus>
+  <div class="error-msg" id="passwordError"></div>
+  <button class="btn" onclick="checkPassword()">כניסה</button>
+</div>
+
+<!-- Setup Screen -->
+<div id="setupScreen" class="setup-screen" style="display:none;">
+  <h2>מיפוי ודוח תלמיד/ה</h2>
+
+  <label for="studentName">שם התלמיד/ה</label>
+  <input type="text" id="studentName" placeholder="הכנס/י שם">
+
+  <label>מין</label>
+  <div class="gender-selector">
+    <div class="gender-option" data-gender="male" onclick="selectGender('male')">זכר</div>
+    <div class="gender-option" data-gender="female" onclick="selectGender('female')">נקבה</div>
+  </div>
+
+  <button class="btn" onclick="startApp()">התחל/י</button>
+</div>
+
+<!-- Main App -->
+<div id="appContainer" class="app-container">
+  <div class="header">
+    <h1 id="headerTitle">מיפוי ודוח</h1>
+    <div class="header-actions">
+      <button class="btn btn-outline" onclick="toggleReport()">
+        <span id="reportToggleText">הצג דוח</span>
+        (<span id="totalSelections">0</span>)
+      </button>
+      <button class="btn btn-primary" onclick="showPrintReport()">הפקת דוח</button>
+      <button class="btn btn-danger" onclick="resetAll()">איפוס</button>
+    </div>
+  </div>
+
+  <div class="student-info-bar" id="studentInfoBar">
+    <span>שם: <strong id="infoName"></strong></span>
+    <span>מין: <strong id="infoGender"></strong></span>
+  </div>
+
+  <div class="level-legend">
+    <span style="font-weight:600;">רמות:</span>
+    <div class="legend-item"><div class="legend-dot l1"></div> תחילת הדרך</div>
+    <div class="legend-item"><div class="legend-dot l2"></div> מהלך הדרך</div>
+    <div class="legend-item"><div class="legend-dot l3"></div> לקראת השגת היעד</div>
+    <div class="legend-item"><div class="legend-dot l4"></div> השגת היעד</div>
+  </div>
+
+  <div class="main-layout">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar"></div>
+
+    <!-- Content -->
+    <div class="content-area" id="contentArea"></div>
+
+    <!-- Report Panel -->
+    <div class="report-panel hidden" id="reportPanel">
+      <div class="report-header">
+        <h3>דוח מרוכז</h3>
+        <button class="btn btn-danger" style="padding:4px 10px;font-size:0.8em;" onclick="clearReport()">נקה הכל</button>
+      </div>
+      <div class="report-count" id="reportCount">0 פריטים נבחרו</div>
+      <div class="report-content" id="reportContent">
+        <div class="empty-report">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+          </svg>
+          <p>לחצ/י על רמה בכל תחום כדי להוסיף לדוח</p>
+        </div>
+      </div>
+      <div class="report-footer">
+        <button class="btn btn-success" onclick="showPrintReport()">הפקת דוח</button>
+        <button class="btn btn-primary" onclick="copyReport()">העתק טקסט</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Print Modal -->
+<div class="modal-overlay" id="printModal">
+  <div class="modal">
+    <h2>דוח מרוכז - <span id="printStudentName"></span></h2>
+    <div id="printableReport" class="printable-report"></div>
+    <div class="modal-actions">
+      <button class="btn btn-success" onclick="window.print()">הדפס</button>
+      <button class="btn btn-primary" onclick="copyReport()">העתק טקסט</button>
+      <button class="btn" style="background:#e5e7eb;" onclick="closePrintModal()">סגור</button>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+  const CORRECT_PASSWORD = 'yanayana';
+
+  function checkPassword() {
+    const input = document.getElementById('passwordInput');
+    const errorEl = document.getElementById('passwordError');
+    const val = input.value;
+
+    if (val === CORRECT_PASSWORD) {
+      document.getElementById('passwordScreen').style.display = 'none';
+      document.getElementById('setupScreen').style.display = 'block';
+      sessionStorage.setItem('yana_auth', '1');
+    } else {
+      input.classList.add('error');
+      errorEl.textContent = 'סיסמה שגויה';
+      setTimeout(() => {
+        input.classList.remove('error');
+      }, 400);
+      input.value = '';
+      input.focus();
+    }
+  }
+
+  // Allow Enter key on password input
+  document.addEventListener('DOMContentLoaded', () => {
+    const pwInput = document.getElementById('passwordInput');
+    if (pwInput) {
+      pwInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') checkPassword();
+      });
+    }
+
+    // Restore session if already authenticated
+    if (sessionStorage.getItem('yana_auth') === '1') {
+      document.getElementById('passwordScreen').style.display = 'none';
+      document.getElementById('setupScreen').style.display = 'block';
+    }
+  });
+
+  let currentGender = null;
+  let currentData = null;
+  let studentName = '';
+  let selections = {}; // key: "catIdx-subIdx-itemIdx", value: {level, levelText, description, category, subcategory}
+  let activeCategoryIdx = 0;
+  let reportVisible = false;
+
+  function selectGender(g) {
+    currentGender = g;
+    document.querySelectorAll('.gender-option').forEach(el => {
+      el.classList.toggle('selected', el.dataset.gender === g);
+    });
+  }
+
+  function startApp() {
+    studentName = document.getElementById('studentName').value.trim();
+    if (!studentName) {
+      alert('נא להזין שם תלמיד/ה');
+      return;
+    }
+    if (!currentGender) {
+      alert('נא לבחור מין');
+      return;
+    }
+
+    currentData = currentGender === 'male' ? DATA_MALE : DATA_FEMALE;
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'block';
+    document.getElementById('headerTitle').textContent = `מיפוי ודוח - ${studentName}`;
+    document.getElementById('infoName').textContent = studentName;
+    document.getElementById('infoGender').textContent = currentGender === 'male' ? 'זכר' : 'נקבה';
+
+    renderSidebar();
+    renderContent(0);
+  }
+
+  function renderSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.innerHTML = '';
+
+    currentData.categories.forEach((cat, catIdx) => {
+      const div = document.createElement('div');
+      div.className = 'sidebar-section';
+
+      const catDiv = document.createElement('div');
+      catDiv.className = 'sidebar-category' + (catIdx === activeCategoryIdx ? ' active' : '');
+
+      // Count selections in this category
+      const count = Object.keys(selections).filter(k => k.startsWith(catIdx + '-')).length;
+      if (count > 0) catDiv.classList.add('has-selections');
+
+      catDiv.innerHTML = `
+        <span>${cat.name}</span>
+        <span class="badge">${count > 0 ? count : ''}</span>
+      `;
+      catDiv.onclick = () => {
+        activeCategoryIdx = catIdx;
+        renderSidebar();
+        renderContent(catIdx);
+      };
+
+      div.appendChild(catDiv);
+      sidebar.appendChild(div);
+    });
+  }
+
+  function renderContent(catIdx) {
+    const area = document.getElementById('contentArea');
+    const cat = currentData.categories[catIdx];
+
+    let html = `<div class="category-title">${cat.name}</div>`;
+
+    cat.subcategories.forEach((sub, subIdx) => {
+      html += `<div class="subcategory">`;
+      html += `<div class="subcategory-header" onclick="toggleSubcategory(this)">
+        <span>${sub.name}</span>
+        <span class="toggle-icon">&#9660;</span>
+      </div>`;
+      html += `<div class="subcategory-items">`;
+
+      sub.items.forEach((item, itemIdx) => {
+        const key = `${catIdx}-${subIdx}-${itemIdx}`;
+        const isSelected = selections[key];
+
+        html += `<div class="item-row${isSelected ? ' selected' : ''}" id="item-${key}">`;
+        html += `<div class="item-description">${item.description}</div>`;
+        if (item.notes) {
+          html += `<div class="item-notes">${item.notes}</div>`;
+        }
+        html += `<div class="level-buttons">`;
+
+        const levelNames = {
+          '1': 'תחילת הדרך',
+          '2': 'מהלך הדרך',
+          '3': 'לקראת השגת היעד',
+          '4': 'השגת היעד'
+        };
+
+        for (const [lvl, text] of Object.entries(item.levels)) {
+          const isLevelSelected = isSelected && isSelected.level === lvl;
+          html += `<button class="level-btn level-${lvl}${isLevelSelected ? ' selected' : ''}"
+            onclick="selectLevel('${key}', '${lvl}', this)"
+            title="${levelNames[lvl] || ''}"
+          >
+            <span class="level-label">${levelNames[lvl] || ''}</span>
+            ${text}
+          </button>`;
+        }
+
+        html += `</div></div>`;
+      });
+
+      html += `</div></div>`;
+    });
+
+    area.innerHTML = html;
+    area.scrollTop = 0;
+  }
+
+  function toggleSubcategory(header) {
+    header.classList.toggle('collapsed');
+    const items = header.nextElementSibling;
+    items.classList.toggle('hidden');
+  }
+
+  function selectLevel(key, level, btn) {
+    const parts = key.split('-');
+    const catIdx = parseInt(parts[0]);
+    const subIdx = parseInt(parts[1]);
+    const itemIdx = parseInt(parts[2]);
+    const cat = currentData.categories[catIdx];
+    const sub = cat.subcategories[subIdx];
+    const item = sub.items[itemIdx];
+
+    const levelNames = {
+      '1': 'תחילת הדרך',
+      '2': 'מהלך הדרך',
+      '3': 'לקראת השגת היעד',
+      '4': 'השגת היעד'
+    };
+
+    // If clicking the same level, deselect
+    if (selections[key] && selections[key].level === level) {
+      delete selections[key];
+    } else {
+      selections[key] = {
+        level: level,
+        levelText: item.levels[level],
+        levelName: levelNames[level],
+        description: item.description,
+        category: cat.name,
+        subcategory: sub.name
+      };
+    }
+
+    updateUI();
+    renderContent(activeCategoryIdx);
+  }
+
+  function updateUI() {
+    const count = Object.keys(selections).length;
+    document.getElementById('totalSelections').textContent = count;
+    renderSidebar();
+    renderReport();
+  }
+
+  function toggleReport() {
+    reportVisible = !reportVisible;
+    const panel = document.getElementById('reportPanel');
+    panel.classList.toggle('hidden', !reportVisible);
+    document.getElementById('reportToggleText').textContent = reportVisible ? 'הסתר דוח' : 'הצג דוח';
+  }
+
+  function renderReport() {
+    const content = document.getElementById('reportContent');
+    const count = Object.keys(selections).length;
+    document.getElementById('reportCount').textContent = `${count} פריטים נבחרו`;
+
+    if (count === 0) {
+      content.innerHTML = `<div class="empty-report">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+        </svg>
+        <p>לחצ/י על רמה בכל תחום כדי להוסיף לדוח</p>
+      </div>`;
+      return;
+    }
+
+    // Group by category
+    const grouped = {};
+    for (const [key, sel] of Object.entries(selections)) {
+      if (!grouped[sel.category]) grouped[sel.category] = [];
+      grouped[sel.category].push({ key, ...sel });
+    }
+
+    let html = '';
+    for (const [catName, items] of Object.entries(grouped)) {
+      html += `<div class="report-category-section">`;
+      html += `<div class="report-category-title">${catName}</div>`;
+      for (const item of items) {
+        html += `<div class="report-item">
+          <button class="remove-btn" onclick="removeSelection('${item.key}')" title="הסר">&times;</button>
+          <div class="report-item-text">
+            <div class="report-item-desc">${item.description}</div>
+            <div class="report-item-level">${item.levelName}: ${item.levelText}</div>
+          </div>
+        </div>`;
+      }
+      html += `</div>`;
+    }
+
+    content.innerHTML = html;
+  }
+
+  function removeSelection(key) {
+    delete selections[key];
+    updateUI();
+    renderContent(activeCategoryIdx);
+  }
+
+  function clearReport() {
+    if (confirm('האם למחוק את כל הבחירות?')) {
+      selections = {};
+      updateUI();
+      renderContent(activeCategoryIdx);
+    }
+  }
+
+  function showPrintReport() {
+    const modal = document.getElementById('printModal');
+    const reportDiv = document.getElementById('printableReport');
+    document.getElementById('printStudentName').textContent = studentName;
+
+    const count = Object.keys(selections).length;
+    if (count === 0) {
+      reportDiv.innerHTML = '<p style="text-align:center;color:#9ca3af;">אין פריטים בדוח</p>';
+      modal.classList.add('active');
+      return;
+    }
+
+    // Group by category
+    const grouped = {};
+    for (const [key, sel] of Object.entries(selections)) {
+      if (!grouped[sel.category]) grouped[sel.category] = [];
+      grouped[sel.category].push(sel);
+    }
+
+    let html = `<p><strong>שם התלמיד/ה:</strong> ${studentName}</p>`;
+    html += `<p><strong>תאריך:</strong> ${new Date().toLocaleDateString('he-IL')}</p>`;
+
+    for (const [catName, items] of Object.entries(grouped)) {
+      html += `<h3>${catName}</h3>`;
+      for (const item of items) {
+        html += `<div class="pr-item">
+          <span class="pr-desc">${item.description}:</span>
+          <span class="pr-level"> ${item.levelText}</span>
+        </div>`;
+      }
+    }
+
+    reportDiv.innerHTML = html;
+    modal.classList.add('active');
+  }
+
+  function closePrintModal() {
+    document.getElementById('printModal').classList.remove('active');
+  }
+
+  function copyReport() {
+    const count = Object.keys(selections).length;
+    if (count === 0) {
+      alert('אין פריטים בדוח');
+      return;
+    }
+
+    const grouped = {};
+    for (const [key, sel] of Object.entries(selections)) {
+      if (!grouped[sel.category]) grouped[sel.category] = [];
+      grouped[sel.category].push(sel);
+    }
+
+    let text = `דוח מיפוי - ${studentName}\n`;
+    text += `תאריך: ${new Date().toLocaleDateString('he-IL')}\n\n`;
+
+    for (const [catName, items] of Object.entries(grouped)) {
+      text += `${catName}:\n`;
+      for (const item of items) {
+        text += `  ${item.description}: ${item.levelText}\n`;
+      }
+      text += '\n';
+    }
+
+    navigator.clipboard.writeText(text).then(() => {
+      alert('הדוח הועתק ללוח!');
+    }).catch(() => {
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      alert('הדוח הועתק ללוח!');
+    });
+  }
+
+  function resetAll() {
+    if (confirm('האם לאפס הכל ולחזור למסך הכניסה?')) {
+      selections = {};
+      currentGender = null;
+      currentData = null;
+      studentName = '';
+      activeCategoryIdx = 0;
+      reportVisible = false;
+
+      document.getElementById('appContainer').style.display = 'none';
+      document.getElementById('setupScreen').style.display = 'block';
+      document.getElementById('studentName').value = '';
+      document.querySelectorAll('.gender-option').forEach(el => el.classList.remove('selected'));
+    }
+  }
+
+  // Keyboard shortcut: Escape to close modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePrintModal();
+  });
+</script>
+
+</body>
+</html>
