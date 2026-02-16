@@ -891,8 +891,9 @@
     });
   }
 
-  function renderContent(catIdx) {
+  function renderContent(catIdx, preserveScroll) {
     const area = document.getElementById('contentArea');
+    const savedScroll = preserveScroll ? area.scrollTop : 0;
     const cat = currentData.categories[catIdx];
 
     let html = `<div class="category-title">${cat.name}</div>`;
@@ -941,7 +942,7 @@
     });
 
     area.innerHTML = html;
-    area.scrollTop = 0;
+    area.scrollTop = savedScroll;
   }
 
   function toggleSubcategory(header) {
@@ -981,7 +982,7 @@
     }
 
     updateUI();
-    renderContent(activeCategoryIdx);
+    renderContent(activeCategoryIdx, true);
   }
 
   function updateUI() {
@@ -1042,14 +1043,14 @@
   function removeSelection(key) {
     delete selections[key];
     updateUI();
-    renderContent(activeCategoryIdx);
+    renderContent(activeCategoryIdx, true);
   }
 
   function clearReport() {
     if (confirm('האם למחוק את כל הבחירות?')) {
       selections = {};
       updateUI();
-      renderContent(activeCategoryIdx);
+      renderContent(activeCategoryIdx, true);
     }
   }
 
