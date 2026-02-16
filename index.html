@@ -202,18 +202,47 @@
       color: #2563eb;
     }
 
-    .sidebar-category .badge {
-      background: #e5e7eb;
-      color: #6b7280;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 0.75em;
-      font-weight: 500;
+    .sidebar-progress {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
     }
 
-    .sidebar-category.has-selections .badge {
+    .sidebar-progress .count-text {
+      font-size: 0.72em;
+      font-weight: 500;
+      color: #9ca3af;
+      white-space: nowrap;
+    }
+
+    .sidebar-category.has-selections .count-text {
+      color: #2563eb;
+      font-weight: 600;
+    }
+
+    .sidebar-category.complete .count-text {
+      color: #059669;
+    }
+
+    .progress-bar-bg {
+      width: 40px;
+      height: 5px;
+      background: #e5e7eb;
+      border-radius: 3px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 3px;
       background: #2563eb;
-      color: white;
+      transition: width 0.3s ease;
+    }
+
+    .sidebar-category.complete .progress-bar-fill {
+      background: #10b981;
     }
 
     /* Content Area */
@@ -872,13 +901,20 @@
       const catDiv = document.createElement('div');
       catDiv.className = 'sidebar-category' + (catIdx === activeCategoryIdx ? ' active' : '');
 
-      // Count selections in this category
+      // Count selections and total items in this category
       const count = Object.keys(selections).filter(k => k.startsWith(catIdx + '-')).length;
+      const total = cat.subcategories.reduce((sum, sub) => sum + sub.items.length, 0);
+      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+
       if (count > 0) catDiv.classList.add('has-selections');
+      if (count === total && total > 0) catDiv.classList.add('complete');
 
       catDiv.innerHTML = `
         <span>${cat.name}</span>
-        <span class="badge">${count > 0 ? count : ''}</span>
+        <div class="sidebar-progress">
+          <span class="count-text">${count}/${total}</span>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+        </div>
       `;
       catDiv.onclick = () => {
         activeCategoryIdx = catIdx;
