@@ -875,6 +875,12 @@
     <div class="gender-option" data-gender="female" onclick="selectGender('female')">נקבה</div>
   </div>
 
+  <div style="margin-top:18px; padding-top:18px; border-top:1px solid #e5e7eb;">
+    <label for="apiKeyInput">Anthropic API Key</label>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-..." style="direction:ltr; font-family:monospace;">
+    <div style="font-size:0.75em; color:#9ca3af; margin-top:4px;">נשמר בדפדפן. יש להזין רק פעם אחת.</div>
+  </div>
+
   <button class="btn" onclick="startApp()">התחל/י</button>
 </div>
 
@@ -1008,12 +1014,17 @@
       document.getElementById('passwordScreen').style.display = 'none';
       document.getElementById('setupScreen').style.display = 'block';
     }
+
+    // Pre-fill API key from localStorage
+    const savedApiKey = localStorage.getItem('yana_anthropic_key');
+    if (savedApiKey) {
+      document.getElementById('apiKeyInput').value = savedApiKey;
+    }
   });
 
   // ====== CONFIGURATION ======
-  // Paste your Anthropic API key below:
-  const ANTHROPIC_API_KEY = '';
-  // ============================
+  // Anthropic API key (loaded from localStorage or setup screen)
+  let ANTHROPIC_API_KEY = localStorage.getItem('yana_anthropic_key') || '';
 
   let currentGender = null;
   let currentData = null;
@@ -1038,6 +1049,13 @@
     if (!currentGender) {
       alert('נא לבחור מין');
       return;
+    }
+
+    // Save API key if provided
+    const apiKeyVal = document.getElementById('apiKeyInput').value.trim();
+    if (apiKeyVal) {
+      ANTHROPIC_API_KEY = apiKeyVal;
+      localStorage.setItem('yana_anthropic_key', apiKeyVal);
     }
 
     currentData = currentGender === 'male' ? DATA_MALE : DATA_FEMALE;
