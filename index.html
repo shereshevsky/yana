@@ -375,32 +375,35 @@
       margin-bottom: 2px;
     }
 
-    .free-text-row {
-      margin-top: 8px;
+    .level-btn.level-free {
+      border-color: #c4b5fd;
+      position: relative;
+    }
+
+    .level-btn.level-free:hover {
+      background: #faf5ff;
+      border-color: #7c3aed;
+    }
+
+    .level-btn.level-free.selected {
+      background: #faf5ff;
+      border-color: #7c3aed;
+      color: #5b21b6;
+      font-weight: 600;
     }
 
     .free-text-input {
       width: 100%;
-      padding: 6px 10px;
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
+      border: none;
+      background: transparent;
       font-size: 0.85em;
       font-family: inherit;
-      resize: vertical;
-      min-height: 34px;
-      max-height: 120px;
       direction: rtl;
-      transition: border-color 0.15s;
-    }
-
-    .free-text-input:focus {
+      resize: none;
       outline: none;
-      border-color: #7c3aed;
-    }
-
-    .free-text-input.has-text {
-      border-color: #7c3aed;
-      background: #faf5ff;
+      min-height: 1.4em;
+      max-height: 80px;
+      overflow-y: auto;
     }
 
     /* Report Panel */
@@ -1129,15 +1132,19 @@
           </button>`;
         }
 
-        const freeTextVal = selections[key] && selections[key].level === 'free' ? selections[key].freeText : '';
-        html += `</div>`;
-        html += `<div class="free-text-row">
-          <textarea class="free-text-input${freeTextVal ? ' has-text' : ''}"
-            placeholder="טקסט חופשי..."
+        const isFreeSelected = isSelected && isSelected.level === 'free';
+        const freeTextVal = isFreeSelected ? isSelected.freeText : '';
+        html += `<button class="level-btn level-free${isFreeSelected ? ' selected' : ''}"
+          onclick="activateFreeText('${key}', this)">
+          <span class="level-label">טקסט חופשי</span>
+          <textarea class="free-text-input"
+            placeholder="הקלד/י כאן..."
             oninput="handleFreeText('${key}', this)"
+            onclick="event.stopPropagation()"
             >${freeTextVal}</textarea>
-        </div>`;
-        html += `</div>`;
+        </button>`;
+
+        html += `</div></div>`;
       });
 
       html += `</div></div>`;
@@ -1185,6 +1192,11 @@
 
     updateUI();
     renderContent(activeCategoryIdx, true);
+  }
+
+  function activateFreeText(key, btn) {
+    const textarea = btn.querySelector('.free-text-input');
+    if (textarea) textarea.focus();
   }
 
   function handleFreeText(key, textarea) {
