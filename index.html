@@ -1478,7 +1478,7 @@
 
     const systemPrompt = `You are an expert Israeli special education report writer. You write in Hebrew. You receive raw assessment data for a student and rewrite it as a coherent, professional educational report. Keep all factual data intact. Write in a warm but professional tone appropriate for parents and educational staff. Use proper Hebrew grammar for ${genderWord} (${currentGender === 'male' ? 'זכר' : 'נקבה'}).`;
 
-    const userPrompt = `הנה נתוני המיפוי הגולמיים של ה${genderWord} ${studentName}. אנא כתוב/כתבי דוח חינוכי מעובד, קוהרנטי ומקצועי בעברית, המבוסס על הנתונים הבאים. שמור/שמרי על כל המידע העובדתי. ארגן/ארגני את הדוח לפסקאות לפי תחומים, בשפה רהוטה ומקצועית:\n\n${reportText}`;
+    const userPrompt = `הנה נתוני המיפוי הגולמיים של ה${genderWord} ${studentName}. אנא כתוב/כתבי דוח חינוכי מעובד, קוהרנטי ומקצועי בעברית, המבוסס על הנתונים הבאים. שמור/שמרי על כל המידע העובדתי. הדוח צריך להיות ללא כותרות המשנה ומחולק לפי תחומי תפקוד שונים. חשוב שהדוח יתחיל עם החוזקות.\n\n${reportText}`;
 
     try {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
