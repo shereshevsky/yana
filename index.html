@@ -648,99 +648,6 @@
     .legend-dot.l3 { background: #86efac; }
     .legend-dot.l4 { background: #93c5fd; }
 
-    /* Password Screen */
-    .password-screen {
-      max-width: 400px;
-      margin: 120px auto;
-      background: white;
-      border-radius: 16px;
-      padding: 40px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      text-align: center;
-    }
-
-    .password-screen .lock-icon {
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 20px;
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .password-screen .lock-icon svg {
-      width: 32px;
-      height: 32px;
-      color: white;
-      stroke: white;
-      fill: none;
-    }
-
-    .password-screen h2 {
-      font-size: 1.4em;
-      margin-bottom: 8px;
-      color: #1e293b;
-    }
-
-    .password-screen p {
-      color: #6b7280;
-      margin-bottom: 24px;
-      font-size: 0.95em;
-    }
-
-    .password-screen input {
-      width: 100%;
-      padding: 14px 16px;
-      border: 2px solid #e5e7eb;
-      border-radius: 10px;
-      font-size: 1.1em;
-      text-align: center;
-      letter-spacing: 2px;
-      margin-bottom: 16px;
-      transition: border-color 0.2s;
-      direction: ltr;
-    }
-
-    .password-screen input:focus {
-      outline: none;
-      border-color: #2563eb;
-    }
-
-    .password-screen input.error {
-      border-color: #ef4444;
-      animation: shake 0.4s ease;
-    }
-
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-8px); }
-      50% { transform: translateX(8px); }
-      75% { transform: translateX(-4px); }
-    }
-
-    .password-screen .error-msg {
-      color: #ef4444;
-      font-size: 0.9em;
-      margin-bottom: 12px;
-      min-height: 1.2em;
-    }
-
-    .password-screen .btn {
-      width: 100%;
-      padding: 14px;
-      font-size: 1.1em;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
-      color: white;
-    }
-
-    .password-screen .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    }
-
     /* AI Refinement */
     .ai-section {
       margin-top: 20px;
@@ -847,23 +754,8 @@
 </head>
 <body>
 
-<!-- Password Screen -->
-<div id="passwordScreen" class="password-screen">
-  <div class="lock-icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-    </svg>
-  </div>
-  <h2>מיפוי ודוח תלמיד/ה</h2>
-  <p>הזינו סיסמה כדי להיכנס למערכת</p>
-  <input type="password" id="passwordInput" placeholder="סיסמה" autofocus>
-  <div class="error-msg" id="passwordError"></div>
-  <button class="btn" onclick="checkPassword()">כניסה</button>
-</div>
-
 <!-- Setup Screen -->
-<div id="setupScreen" class="setup-screen" style="display:none;">
+<div id="setupScreen" class="setup-screen">
   <h2>מיפוי ודוח תלמיד/ה</h2>
 
   <label for="studentName">שם התלמיד/ה</label>
@@ -972,44 +864,6 @@
 
 <script src="data.js"></script>
 <script>
-  const CORRECT_PASSWORD = 'sesame';
-
-  function checkPassword() {
-    const input = document.getElementById('passwordInput');
-    const errorEl = document.getElementById('passwordError');
-    const val = input.value;
-
-    if (val === CORRECT_PASSWORD) {
-      document.getElementById('passwordScreen').style.display = 'none';
-      document.getElementById('setupScreen').style.display = 'block';
-      sessionStorage.setItem('yana_auth', '1');
-    } else {
-      input.classList.add('error');
-      errorEl.textContent = 'סיסמה שגויה';
-      setTimeout(() => {
-        input.classList.remove('error');
-      }, 400);
-      input.value = '';
-      input.focus();
-    }
-  }
-
-  // Allow Enter key on password input
-  document.addEventListener('DOMContentLoaded', () => {
-    const pwInput = document.getElementById('passwordInput');
-    if (pwInput) {
-      pwInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') checkPassword();
-      });
-    }
-
-    // Restore session if already authenticated
-    if (sessionStorage.getItem('yana_auth') === '1') {
-      document.getElementById('passwordScreen').style.display = 'none';
-      document.getElementById('setupScreen').style.display = 'block';
-    }
-
-  });
 
   let GROQ_API_KEY = '';
 
